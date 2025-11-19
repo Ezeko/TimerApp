@@ -1,0 +1,361 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimerApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="800"
+        x:Class="TimerApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Timer App"
+        Width="600"
+        Height="850"
+        MinWidth="450"
+        MinHeight="650"
+        Background="#0A0E27">
+
+    <!-- Design-time DataContext for previewer -->
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <!-- Window-wide styles for consistent theming -->
+    <Window.Styles>
+        <!-- Title text style - used for main header -->
+        <Style Selector="TextBlock.title">
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+        
+        <!-- Section title style - used for preset section header -->
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="Foreground" Value="#00D9FF"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,10,0,10"/>
+        </Style>
+        
+        <!-- Main timer display style - large countdown/countup display -->
+        <Style Selector="TextBlock.display">
+            <Setter Property="FontSize" Value="72"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="20"/>
+        </Style>
+        
+        <!-- Positive time color (cyan) - before timer reaches zero -->
+        <Style Selector="TextBlock.display.positive">
+            <Setter Property="Foreground" Value="#00D9FF"/>
+        </Style>
+        
+        <!-- Negative time color (red) - after timer goes into overtime -->
+        <Style Selector="TextBlock.display.negative">
+            <Setter Property="Foreground" Value="#FF4757"/>
+        </Style>
+        
+        <!-- Primary button style - used for Start/Pause button -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#6C5CE7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="30,15"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        
+        <!-- Primary button hover effect -->
+        <Style Selector="Button.primary:pointerover">
+            <Setter Property="Background" Value="#7D6EF8"/>
+        </Style>
+        
+        <!-- Secondary button style - used for Reset and utility buttons -->
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#2D3561"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="30,15"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        
+        <!-- Secondary button hover effect -->
+        <Style Selector="Button.secondary:pointerover">
+            <Setter Property="Background" Value="#3D4571"/>
+        </Style>
+        
+        <!-- Preset button style - used for timer preset buttons -->
+        <Style Selector="Button.preset">
+            <Setter Property="Background" Value="#1A1F3A"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#2D3561"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        
+        <!-- Preset button hover effect -->
+        <Style Selector="Button.preset:pointerover">
+            <Setter Property="Background" Value="#2D3561"/>
+            <Setter Property="BorderBrush" Value="#6C5CE7"/>
+        </Style>
+        
+        <!-- Numeric input style - used for hour/minute/second inputs -->
+        <Style Selector="NumericUpDown">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="#1A1F3A"/>
+            <Setter Property="BorderBrush" Value="#2D3561"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+
+        <!-- Error style for invalid input -->
+        <Style Selector="NumericUpDown.error">
+            <Setter Property="BorderBrush" Value="#FF4757"/>
+        </Style>
+        
+        <!-- Label style - used for input field labels -->
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="#A0A0A0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        
+        <!-- Hint text style - used for keyboard shortcut hints -->
+        <Style Selector="TextBlock.hint">
+            <Setter Property="Foreground" Value="#707070"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontStyle" Value="Italic"/>
+        </Style>
+    </Window.Styles>
+
+    <!-- Global keyboard shortcuts for the window -->
+    <Window.KeyBindings>
+        <!-- Space bar: Start/Stop timer -->
+        <KeyBinding Gesture="Space" Command="{Binding StartStopCommand}"/>
+        <!-- R key: Reset timer -->
+        <KeyBinding Gesture="R" Command="{Binding ResetCommand}"/>
+        <!-- Ctrl+S: Save current time as preset -->
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding AddCustomPresetCommand}"/>
+    </Window.KeyBindings>
+
+    <!-- Main scrollable content area -->
+    <ScrollViewer>
+        <Grid Margin="30,20,30,30">
+            <Grid.RowDefinitions>
+                <!-- Row 0: Header -->
+                <RowDefinition Height="Auto"/>
+                <!-- Row 1: Timer display and inputs -->
+                <RowDefinition Height="Auto"/>
+                <!-- Row 2: Control buttons -->
+                <RowDefinition Height="Auto"/>
+                <!-- Row 3: Presets section -->
+                <RowDefinition Height="Auto"/>
+                <!-- Row 4: Footer actions -->
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ==================== HEADER ==================== -->
+            <TextBlock Grid.Row="0" 
+                       Text="⏱️ Timer App" 
+                       Classes="title"
+                       HorizontalAlignment="Center"/>
+
+            <!-- ==================== TIMER DISPLAY & INPUTS ==================== -->
+            <Border Grid.Row="1" 
+                    Background="#1A1F3A"
+                    CornerRadius="16"
+                    Padding="25"
+                    BoxShadow="0 8 32 #00000040"
+                    Margin="0,0,0,25">
+                
+                <StackPanel VerticalAlignment="Center">
+                    <!-- Responsive Timer Display - scales with window size using Viewbox -->
+                    <Viewbox Stretch="Uniform" 
+                             MaxHeight="150"
+                             Margin="0,10,0,20">
+                        <TextBlock Text="{Binding DisplayTime}" 
+                                   Classes.positive="{Binding !IsNegative}"
+                                   Classes.negative="{Binding IsNegative}"
+                                   Classes="display"/>
+                    </Viewbox>
+
+                    <!-- Time Input Controls - only visible when timer is not active (reset) -->
+                    <StackPanel IsVisible="{Binding !IsTimerActive}"
+                               Spacing="15">
+                        <TextBlock Text="Set Timer Duration" 
+                                   Classes="label"
+                                   HorizontalAlignment="Center"
+                                   FontSize="16"
+                                   Margin="0,0,0,15"/>
+                        
+                        <!-- Responsive grid for time inputs - properly spaced -->
+                        <Grid ColumnDefinitions="*,15,*,15,*"
+                              MaxWidth="500"
+                              HorizontalAlignment="Center"
+                              Margin="10,0">
+                            
+                            <!-- HOURS INPUT -->
+                            <StackPanel Grid.Column="0" Spacing="8">
+                                <TextBlock Text="Hours" 
+                                          Classes="label"/>
+                                <NumericUpDown Name="HoursInput"
+                                             Value="{Binding Hours}"
+                                             Minimum="0"
+                                             Maximum="23"
+                                             MinWidth="120"/>
+                            </StackPanel>
+
+                            <!-- MINUTES INPUT -->
+                            <StackPanel Grid.Column="2" Spacing="8">
+                                <TextBlock Text="Minutes" 
+                                          Classes="label"/>
+                                <NumericUpDown Name="MinutesInput"
+                                             Value="{Binding Minutes}"
+                                             Minimum="0"
+                                             Maximum="59"
+                                             MinWidth="120"/>
+                            </StackPanel>
+
+                            <!-- SECONDS INPUT -->
+                            <StackPanel Grid.Column="4" Spacing="8">
+                                <TextBlock Text="Seconds" 
+                                          Classes="label"/>
+                                <NumericUpDown Name="SecondsInput"
+                                             Value="{Binding Seconds}"
+                                             Minimum="0"
+                                             Maximum="59"
+                                             MinWidth="120"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ==================== CONTROL BUTTONS ==================== -->
+            <StackPanel Grid.Row="2" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Center"
+                        Spacing="15"
+                        Margin="0,0,0,25">
+                <!-- Start/Pause/Resume button - text changes based on state -->
+                <Button Content="{Binding StartButtonText}" 
+                        Classes="primary"
+                        Command="{Binding StartStopCommand}"
+                        MinWidth="160"/>
+                <!-- Reset button - stops and clears timer -->
+                <Button Content="Reset" 
+                        Classes="secondary"
+                        Command="{Binding ResetCommand}"
+                        MinWidth="160"/>
+            </StackPanel>
+
+            <!-- ==================== PRESETS SECTION ==================== -->
+            <Border Grid.Row="3"
+                    Background="#1A1F3A"
+                    CornerRadius="12"
+                    Padding="20"
+                    Margin="0,0,0,25">
+                <StackPanel Spacing="12">
+                    <!-- Preset section header with save button -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="⭐ Quick Presets" 
+                                   Classes="sectionTitle"/>
+                        <!-- Save current time as preset button -->
+                        <Button Grid.Column="1"
+                                Content="➕ Save Current"
+                                Classes="preset"
+                                Command="{Binding AddCustomPresetCommand}"
+                                ToolTip.Tip="Save current time as preset (Ctrl+S)"/>
+                    </Grid>
+                    
+                    <!-- List of preset buttons - wraps to multiple lines if needed -->
+                    <ItemsControl ItemsSource="{Binding Presets}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <!-- WrapPanel automatically wraps buttons to next line -->
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <!-- Each preset as a clickable button -->
+                                <Button Classes="preset"
+                                        Command="{Binding $parent[Window].DataContext.ApplyPresetCommand}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <!-- Preset icon (emoji) -->
+                                        <TextBlock Text="{Binding Icon}"/>
+                                        <!-- Preset name -->
+                                        <TextBlock Text="{Binding Name}"/>
+                                        <!-- Preset duration -->
+                                        <TextBlock Text="{Binding Duration}" 
+                                                   Foreground="#A0A0A0"
+                                                   FontSize="11"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- ==================== FOOTER ACTIONS ==================== -->
+            <StackPanel Grid.Row="4" Spacing="15">
+                <!-- Utility buttons row -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Spacing="12">
+                    <!-- Open settings window -->
+                    <Button Content="⚙️ Settings"
+                            Name="SettingsButton"
+                            Classes="secondary"
+                            Padding="20,10"
+                            FontSize="14"/>
+                    <!-- Open secondary display window -->
+                    <Button Content="🖥️ Open Display"
+                            Name="DisplayButton"
+                            Classes="secondary"
+                            Padding="20,10"
+                            FontSize="14"/>
+                    <!-- Minimize to system tray -->
+                    <Button Content="📌 Minimize to Tray"
+                            Name="MinimizeToTrayButton"
+                            Classes="secondary"
+                            Padding="20,10"
+                            FontSize="14"/>
+                </StackPanel>
+                
+                <!-- Keyboard shortcuts hint section -->
+                <StackPanel HorizontalAlignment="Center" Spacing="3">
+                    <TextBlock Text="⌨️ Keyboard Shortcuts" 
+                               Classes="hint"
+                               HorizontalAlignment="Center"
+                               Margin="0,5,0,3"/>
+                    <!-- List of available shortcuts -->
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Center"
+                                Spacing="15">
+                        <TextBlock Text="Space: Start/Pause" Classes="hint"/>
+                        <TextBlock Text="R: Reset" Classes="hint"/>
+                        <TextBlock Text="Ctrl+S: Save Preset" Classes="hint"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+
+</Window>

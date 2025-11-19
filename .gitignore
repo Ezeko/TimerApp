@@ -1,0 +1,30 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio & VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+
+# Mac
+.DS_Store
+
+# JetBrains / Rider
+.idea/
+*.sln.iml
+
+# Logs
+*.log
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Publish directory
+releases/
+!website/releases/

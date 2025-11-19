@@ -1,0 +1,128 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimerApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080"
+        x:Class="TimerApp.Views.TimerDisplayWindow"
+        x:DataType="vm:TimerDisplayViewModel"
+        Title="Timer Display - Press ESC to exit"
+        Background="Transparent"
+        WindowState="FullScreen"
+        SystemDecorations="None"
+        CanResize="False"
+        TransparencyLevelHint="Transparent">
+
+    <Design.DataContext>
+        <vm:TimerDisplayViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <!-- Dynamic timer display style with data-bound colors -->
+        <Style Selector="TextBlock.display">
+            <Setter Property="FontSize" Value="220"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontFamily" Value="Segoe UI, Arial, sans-serif"/>
+        </Style>
+        
+        <!-- ESC hint text style -->
+        <Style Selector="TextBlock.hint">
+            <Setter Property="Foreground" Value="#80FFFFFF"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontStyle" Value="Italic"/>
+            <Setter Property="Opacity" Value="0.6"/>
+            <Setter Property="FontFamily" Value="Segoe UI, Arial, sans-serif"/>
+        </Style>
+    </Window.Styles>
+
+    <!-- Main grid container -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Background Layer with customizable color/image -->
+        <Border Grid.RowSpan="2">
+            <Grid>
+                <!-- Solid color background -->
+                <Border>
+                    <Border.Background>
+                        <SolidColorBrush Color="Transparent"/> <!-- Placeholder, actual background is below -->
+                    </Border.Background>
+                </Border>
+                
+                <!-- Actual Background Layer -->
+                <Border Background="{Binding BackgroundBrush}"/>
+                
+                <!-- Optional background image overlay -->
+                <Border IsVisible="{Binding UseBackgroundImage}">
+                    <Image Source="{Binding BackgroundImagePath}"
+                           Stretch="UniformToFill"
+                           Opacity="{Binding BackgroundImageOpacity}"/>
+                </Border>
+                
+                <!-- Subtle gradient overlay for depth -->
+                <Border>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%, 100%" Opacity="0.3">
+                            <GradientStop Color="#00000000" Offset="0"/>
+                            <GradientStop Color="#20000000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Timer Display with perfect scaling -->
+        <Viewbox Grid.Row="0" 
+                 Stretch="Uniform" 
+                 Margin="100"
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Center">
+            <Grid>
+                <!-- Glow effect background -->
+                <TextBlock Text="{Binding DisplayTime}" 
+                          Classes="display"
+                          Opacity="0.3"
+                          Foreground="{Binding CurrentDisplayBrush}">
+                    <TextBlock.Effect>
+                        <BlurEffect Radius="30"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+
+                <!-- Main timer text with dynamic color -->
+                <TextBlock Text="{Binding DisplayTime}" 
+                          Classes="display"
+                          Foreground="{Binding CurrentDisplayBrush}">
+                    <TextBlock.Effect>
+                        <!-- Professional drop shadow for readability -->
+                        <DropShadowEffect Color="#000000" 
+                                        BlurRadius="50" 
+                                        OffsetX="0" 
+                                        OffsetY="20"
+                                        Opacity="0.7"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+            </Grid>
+        </Viewbox>
+        
+        <!-- ESC key hint at bottom -->
+        <StackPanel Grid.Row="1" 
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,40">
+            <TextBlock Text="Press " Classes="hint"/>
+            <TextBlock Text="ESC" 
+                       Classes="hint" 
+                       FontWeight="Bold"
+                       Foreground="#FFFFFF"
+                       Opacity="0.8"/>
+            <TextBlock Text=" to exit fullscreen" Classes="hint"/>
+        </StackPanel>
+    </Grid>
+
+</Window>
