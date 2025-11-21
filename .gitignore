@@ -28,3 +28,4 @@ Desktop.ini
 # Publish directory
 releases/
 !website/releases/
+*.zip
